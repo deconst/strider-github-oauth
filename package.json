@@ -1,0 +1,38 @@
+{
+  "name": "strider-template",
+  "version": "1.0.0",
+  "description": "Plugin template for Strider CD",
+  "main": "webapp.js",
+  "scripts": {
+    "test": "mocha -R spec --recursive test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bitwit/strider-template.git"
+  },
+  "keywords": [
+    "strider",
+    "plugin",
+    "template"
+  ],
+  "author": "Kyle Newsome <kyle@bitwit.ca>",
+  "license": "ISC",
+  "dependencies": {
+  },
+  "strider": {
+    "type": "job",
+    "id": "template",
+    "title": "Plugin Template",
+    "worker": "worker.js",
+    "webapp": "webapp.js",
+    "icon": "icon.png",
+    "config": {
+      "controller": "TemplateCtrl"
+    }
+  },
+  "devDependencies": {
+    "chai": "^1.9.1",
+    "mocha": "^1.20.1",
+    "sinon-chai": "^2.5.0"
+  }
+}

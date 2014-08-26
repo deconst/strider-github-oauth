@@ -1,0 +1,45 @@
+<div id="template" class="well">
+    <h2>Template Config Page</h2>
+    <button ng-click="save()" class="btn btn-primary">Save</button>
+    <br/>
+    <br/>
+    <p class="help-text">
+        These are some messages for demonstrating how the plugin saves config data and reports it during the test process.
+        Each message used slightly differently, so see `worker.js` for different ways to execute actions using config data
+    </p>
+    <h3>Environment</h3>
+    <div class="row-fluid">
+        <div class="span12">
+            <textarea ui-refresh="selectedTab" ng-model="config.environment"></textarea>
+        </div>
+    </div>
+    <br/>
+    <h3>Prepare</h3>
+    <div class="row-fluid">
+        <div class="span12">
+            <textarea ui-refresh="selectedTab" ng-model="config.prepare"></textarea>
+        </div>
+    </div>
+    <br/>
+    <h3>Test</h3>
+    <div class="row-fluid">
+        <div class="span12">
+            <textarea ui-refresh="selectedTab" ng-model="config.test"></textarea>
+        </div>
+    </div>
+    <br/>
+    <h3>Deploy</h3>
+    <div class="row-fluid">
+        <div class="span12">
+            <textarea ui-refresh="selectedTab" ng-model="config.deploy"></textarea>
+        </div>
+    </div>
+    <br/>
+    <h3>Cleanup</h3>
+    <div class="row-fluid cleanup">
+        <div class="span12">
+            <textarea ui-refresh="selectedTab" ng-model="config.cleanup"></textarea>
+        </div>
+    </div>
+    <button ng-click="save()" class="btn btn-primary">Save</button>
+</div>

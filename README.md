@@ -1,8 +1,10 @@
-# strider-template
+# GitHub OAuth login
 
-This is a base template for developing Strider CD plugins to help you get your own plugin up and running faster.
+This plugin extends Strider with the ability to authenticate to Strider itself via GitHub OAuth.
 
-It demonstrates some basic front/backend functionality including configuration saving and some console.logging during the
-test process
+## Configuration
 
-## [Learn more about how Strider loads plugins here](https://github.com/Strider-CD/strider-extension-loader)
+The following variables must be present in your environment:
+
+ * `PLUGIN_GITHUB_APP_ID` is the application ID from GitHub's OAuth registration.
+ * `PLUGIN_GITHUB_APP_SECRET` is the application secret.

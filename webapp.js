@@ -1,37 +1,73 @@
-module.exports = {
-    // mongoose schema, if you need project-specific config
-    config: {
-        "template": {
-            environment: {type: String, default: 'Hi from `environment`'},
-            prepare: {type: String, default: 'Hi from `prepare`'},
-            test: {type: String, default: 'Hi from `test`'},
-            deploy: {type: String, default: 'Hi from `deploy`'},
-            cleanup: {type: String, default: 'Hi from `cleanup`'}
-        }
-    },
-    // Define project-specific routes
-    //   all routes created here are namespaced within /:org/:repo/api/:pluginid
-    //   req.project is the current project
-    //   req.accessLevel is the current user's access level for the project
-    //      0 - anonymous, 1 - authed, 2 - admin / collaborator
-    //   req.user is the current user
-    //   req.pluginConfig() -> get the config for this plugin
-    //   req.pluginConfig(config, cb(err)) -> set the config for this plugin
-    routes: function (app, context) {
-    },
-    // Define global routes
-    //   all routes namespaced within /ext/:pluginid
-    //   req.user is the current user
-    //   req.user.account_level can be used for authorization
-    //      0 - anonymous, 1 - authed, 2 - admin / collaborator
-    globalRoutes: function (app, context) {
-    },
-    // Listen for global events
-    //   all job-local events that begin with `plugin.` are proxied to
-    //   the main strider eventemitter, so you can listen for them here.
-    //   Other events include `job.new`, `job.done` and `browser.update`.
-    listen: function (emitter, context) {
+var GitHubStrategy = require('passport-github2').Strategy;
+
+module.exports = function (context, done) {
+  var app = context.app;
+  var passport = context.passport;
+  var User = context.models.User;
+
+  var tryAddresses = function (addresses, i, e, cb) {
+    if (i >= addresses.length) {
+      return cb(e);
     }
 
+    var current = addresses[i];
 
+    User.findByEmail(current, function (err, users) {
+      if (err) return cb(err);
+
+      if (users.length === 0) {
+        return tryAddresses(addresses, i + 1, e, cb);
+      }
+
+      if (users.length > 1) {
+        var duplicate = new Error("More than one user had the address " + current);
+        return tryAddresses(addresses, i + 1, duplicate, cb);
+      }
+
+      return cb(null, users[0]);
+    })
+  };
+
+  app.registerAuthStrategy(new GitHubStrategy({
+    clientID: process.env.PLUGIN_GITHUB_APP_ID,
+    clientSecret: process.env.PLUGIN_GITHUB_APP_SECRET,
+    callbackURL: 'http://localhost:3000/githubauthcallback/'
+  }, function (accessToken, refreshToken, profile, cb) {
+    var addresses = [];
+    if (profile.email) {
+      addresses.push(profile.email);
+    }
+
+    profile.emails.forEach(function (each) {
+      addresses.push(each.value);
+    });
+
+    if (addresses.length === 0) {
+      return cb(new Error('There are no email addresses on your GitHub profile.'));
+    }
+
+    tryAddresses(addresses, 0, new Error('User not found.'), cb);
+  }));
+
+  app.get('/wat/', function (req, res) {
+    res.send('wat');
+  });
+
+  app.get('/githubauth/',
+    passport.authenticate('github', { scope: ['user:email'] }));
+  app.get('/githubauthcallback/',
+    passport.authenticate('github', { failureRedirect: '/login?failed=true' }),
+    function (req, res) {
+      res.redirect('/');
+    });
+
+  context.registerBlock('LoggedOutFillContent', function (context, cb) {
+    var snippet = '<a href="/githubauth/">Log in with GitHub</a>';
+
+    console.log(require('util').inspect(context, { depth: 2 }));
+
+    cb(null, context.content + snippet);
+  });
+
+  done(null);
 };

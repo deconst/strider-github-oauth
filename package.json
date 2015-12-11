@@ -1,28 +1,30 @@
 {
-  "name": "strider-template",
+  "name": "strider-github-auth",
   "version": "1.0.0",
-  "description": "Plugin template for Strider CD",
+  "description": "GitHub OAuth login flow for Strider CD",
   "main": "webapp.js",
   "scripts": {
     "test": "mocha -R spec --recursive test"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/bitwit/strider-template.git"
+    "url": "https://github.com/smashwilson/strider-github-auth.git"
   },
   "keywords": [
     "strider",
     "plugin",
     "template"
   ],
-  "author": "Kyle Newsome <kyle@bitwit.ca>",
-  "license": "ISC",
+  "author": "Ash Wilson <kyle@bitwit.ca>",
+  "license": "MIT",
   "dependencies": {
+    "passport": "^0.3.2",
+    "passport-github2": "^0.1.9"
   },
   "strider": {
-    "type": "job",
-    "id": "template",
-    "title": "Plugin Template",
+    "type": "basic",
+    "id": "githubauth",
+    "title": "GitHub OAuth Login",
     "worker": "worker.js",
     "webapp": "webapp.js",
     "icon": "icon.png",

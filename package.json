@@ -15,7 +15,7 @@
     "plugin",
     "template"
   ],
-  "author": "Ash Wilson <kyle@bitwit.ca>",
+  "author": "Ash Wilson <smashwilson@gmail.com>",
   "license": "MIT",
   "dependencies": {
     "passport": "^0.3.2",

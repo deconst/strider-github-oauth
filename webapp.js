@@ -1,18 +1,18 @@
 var GitHubStrategy = require('passport-github2').Strategy;
 
-module.exports = function (context, done) {
+module.exports = function(context, done) {
   var app = context.app;
   var passport = context.passport;
   var User = context.models.User;
 
-  var tryAddresses = function (addresses, i, e, cb) {
+  var tryAddresses = function(addresses, i, e, cb) {
     if (i >= addresses.length) {
       return cb(e);
     }
 
     var current = addresses[i];
 
-    User.findByEmail(current, function (err, users) {
+    User.findByEmail(current, function(err, users) {
       if (err) return cb(err);
 
       if (users.length === 0) {
@@ -25,20 +25,20 @@ module.exports = function (context, done) {
       }
 
       return cb(null, users[0]);
-    })
+    });
   };
 
   app.registerAuthStrategy(new GitHubStrategy({
     clientID: process.env.PLUGIN_GITHUB_APP_ID,
     clientSecret: process.env.PLUGIN_GITHUB_APP_SECRET,
     callbackURL: 'http://localhost:3000/githubauthcallback/'
-  }, function (accessToken, refreshToken, profile, cb) {
+  }, function(accessToken, refreshToken, profile, cb) {
     var addresses = [];
     if (profile.email) {
       addresses.push(profile.email);
     }
 
-    profile.emails.forEach(function (each) {
+    profile.emails.forEach(function(each) {
       addresses.push(each.value);
     });
 
@@ -49,22 +49,28 @@ module.exports = function (context, done) {
     tryAddresses(addresses, 0, new Error('User not found.'), cb);
   }));
 
-  app.get('/wat/', function (req, res) {
+  app.get('/wat/', function(req, res) {
     res.send('wat');
   });
 
   app.get('/githubauth/',
-    passport.authenticate('github', { scope: ['user:email'] }));
+    passport.authenticate('github', {
+      scope: ['user:email']
+    }));
   app.get('/githubauthcallback/',
-    passport.authenticate('github', { failureRedirect: '/login?failed=true' }),
-    function (req, res) {
+    passport.authenticate('github', {
+      failureRedirect: '/login?failed=true'
+    }),
+    function(req, res) {
       res.redirect('/');
     });
 
-  context.registerBlock('LoggedOutFillContent', function (context, cb) {
+  context.registerBlock('LoggedOutFillContent', function(context, cb) {
     var snippet = '<a href="/githubauth/">Log in with GitHub</a>';
 
-    console.log(require('util').inspect(context, { depth: 2 }));
+    console.log(require('util').inspect(context, {
+      depth: 2
+    }));
 
     cb(null, context.content + snippet);
   });

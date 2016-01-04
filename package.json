@@ -25,12 +25,8 @@
     "type": "basic",
     "id": "githubauth",
     "title": "GitHub OAuth Login",
-    "worker": "worker.js",
     "webapp": "webapp.js",
-    "icon": "icon.png",
-    "config": {
-      "controller": "TemplateCtrl"
-    }
+    "icon": "icon.png"
   },
   "devDependencies": {
     "chai": "^1.9.1",

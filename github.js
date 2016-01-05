@@ -91,7 +91,7 @@ GitHub.prototype.findTeamWithName = function (orgName, teamName, callback) {
 
       consumePage(link.next);
     });
-  };
+  }.bind(this);
 
   consumePage(p);
 };

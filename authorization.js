@@ -160,10 +160,9 @@ exports.makeStrategyCallback = function (context) {
   // All together, now.
   return function(accessToken, refreshToken, profile, callback) {
     var gh = new GitHub(profile, accessToken);
-    var addresses = emailsFromProfile(profile);
 
     async.parallel({
-      user: async.apply(findUser, addresses),
+      user: async.apply(findUser, profile),
       authorization: async.apply(checkAuthorization, gh)
     }, function (err, results) {
       if (err) return callback(err);

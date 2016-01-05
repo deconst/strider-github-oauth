@@ -1,4 +1,6 @@
 var GitHubStrategy = require('passport-github2').Strategy;
+var fs = require('fs');
+var path = require('path');
 
 module.exports = function(context, done) {
   var app = context.app;
@@ -61,13 +63,9 @@ module.exports = function(context, done) {
       res.redirect('/');
     });
 
-  context.registerBlock('LoggedOutFillContent', function(context, cb) {
-    var snippet = '<a class="btn btn-primary provider-github" href="/github/auth/login/">';
-    snippet += '<i class="fa fa-github"></i> ';
-    snippet += 'Log in with GitHub';
-    snippet += '</a>';
-
-    cb(null, snippet);
+  context.registerBlock('LoggedOutFillContent', function (context, cb) {
+    var templatePath = path.join(__dirname, './static/login.html');
+    fs.readFile(templatePath, { encoding: 'utf-8' }, cb);
   });
 
   done(null);

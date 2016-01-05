@@ -1,4 +1,4 @@
-var request = require('requests');
+var request = require('request');
 var parseLinkHeader = require('parse-link-header');
 
 var config = require('./config');

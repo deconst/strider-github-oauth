@@ -58,7 +58,7 @@ GitHub.prototype.belongsToTeam = function (teamId, callback) {
 };
 
 GitHub.prototype.findTeamWithName = function (orgName, teamName, callback) {
-  var p = '/org/';
+  var p = '/orgs/';
   p += encodeURIComponent(orgName);
   p += '/teams';
 

@@ -36,7 +36,7 @@ GitHub.prototype.belongsToTeam = function (teamId, callback) {
   var p = '/teams/';
   p += encodeURIComponent(teamId);
   p += '/memberships/';
-  p += encodeURIComponent(this.profile.id);
+  p += encodeURIComponent(this.profile._json.login);
 
   this.api.get(p, function (err, response, body) {
     if (err) return callback(err);

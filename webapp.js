@@ -31,7 +31,7 @@ module.exports = function(context, done) {
   app.registerAuthStrategy(new GitHubStrategy({
     clientID: process.env.PLUGIN_GITHUB_APP_ID,
     clientSecret: process.env.PLUGIN_GITHUB_APP_SECRET,
-    callbackURL: 'http://localhost:3000/githubauthcallback/'
+    callbackURL: 'http://localhost:3000/github/auth/callback/'
   }, function(accessToken, refreshToken, profile, cb) {
     var addresses = [];
     if (profile.email) {
@@ -49,15 +49,11 @@ module.exports = function(context, done) {
     tryAddresses(addresses, 0, new Error('User not found.'), cb);
   }));
 
-  app.get('/wat/', function(req, res) {
-    res.send('wat');
-  });
-
-  app.get('/githubauth/',
+  app.get('/github/auth/login/',
     passport.authenticate('github', {
-      scope: ['user:email']
+      scope: ['user:email', 'read:org']
     }));
-  app.get('/githubauthcallback/',
+  app.get('/github/auth/callback/',
     passport.authenticate('github', {
       failureRedirect: '/login?failed=true'
     }),
@@ -66,13 +62,9 @@ module.exports = function(context, done) {
     });
 
   context.registerBlock('LoggedOutFillContent', function(context, cb) {
-    var snippet = '<a href="/githubauth/">Log in with GitHub</a>';
+    var snippet = '<a href="/github/auth/login/">Log in with GitHub</a>';
 
-    console.log(require('util').inspect(context, {
-      depth: 2
-    }));
-
-    cb(null, context.content + snippet);
+    cb(null, snippet);
   });
 
   done(null);

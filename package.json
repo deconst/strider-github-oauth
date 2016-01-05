@@ -18,8 +18,10 @@
   "author": "Ash Wilson <smashwilson@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "async": "^1.5.1",
     "passport": "^0.3.2",
-    "passport-github2": "^0.1.9"
+    "passport-github2": "^0.1.9",
+    "request": "^2.67.0"
   },
   "strider": {
     "type": "basic",

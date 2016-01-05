@@ -46,8 +46,7 @@ GitHub.prototype.belongsToTeam = function (teamId, callback) {
     }
 
     if (response.statusCode !== 200) {
-      return callback(new Error({
-        message: 'Unexpected status from GitHub API',
+      return callback(new Error('Unexpected status from GitHub API', {
         path: p,
         statusCode: response.statusCode,
         body: body
@@ -68,8 +67,7 @@ GitHub.prototype.findTeamWithName = function (orgName, teamName, callback) {
       if (err) return callback(err);
 
       if (response.statusCode !== 200) {
-        return callback(new Error({
-          message: 'Unexpected status from GitHub API',
+        return callback(new Error('Unexpected ' + response.statusCode + ' status from GitHub API', {
           path: p,
           statusCode: response.statusCode,
           body: body
@@ -86,8 +84,7 @@ GitHub.prototype.findTeamWithName = function (orgName, teamName, callback) {
       var parsed = link && parseLinkHeader(link);
 
       if (!link || !parsed.next) {
-        return callback(new Error({
-          message: 'Team name ' + teamName + ' not found',
+        return callback(new Error('Team name ' + teamName + ' not found', {
           path: p
         }));
       }

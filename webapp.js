@@ -62,7 +62,10 @@ module.exports = function(context, done) {
     });
 
   context.registerBlock('LoggedOutFillContent', function(context, cb) {
-    var snippet = '<a href="/github/auth/login/">Log in with GitHub</a>';
+    var snippet = '<a class="btn btn-primary provider-github" href="/github/auth/login/">';
+    snippet += '<i class="fa fa-github"></i> ';
+    snippet += 'Log in with GitHub';
+    snippet += '</a>';
 
     cb(null, snippet);
   });

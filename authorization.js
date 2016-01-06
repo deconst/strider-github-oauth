@@ -24,9 +24,6 @@ exports.makeStrategyCallback = function (context) {
   // Given a profile from the GitHub API, return an array of normalized email addresses to test.
   var emailsFromProfile = function (profile) {
     var addresses = [];
-    if (profile.email) {
-      addresses.push(profile.email.toLowerCase());
-    }
 
     profile.emails.forEach(function(each) {
       addresses.push(each.value.toLowerCase());

@@ -8,12 +8,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/smashwilson/strider-github-auth.git"
+    "url": "https://github.com/smashwilson/strider-github-oauth.git"
   },
   "keywords": [
     "strider",
     "plugin",
-    "template"
+    "github",
+    "oauth"
   ],
   "author": "Ash Wilson <smashwilson@gmail.com>",
   "license": "MIT",

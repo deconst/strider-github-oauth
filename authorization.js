@@ -54,7 +54,9 @@ exports.makeStrategyCallback = function (context) {
         user.set('password', crypto.randomBytes(256).toString('utf-8'));
         user.projects = [];
 
-        return user.save(callback);
+        return user.save(function (err) {
+          callback(err, user);
+        });
       }
 
       logger.info('Existing user with address ' + results[0].email + ' authenticated.');

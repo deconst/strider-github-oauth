@@ -6,6 +6,7 @@ var config = require('./config');
 
 exports.makeStrategyCallback = function (context) {
   var User = context.models.User;
+  var logger = context.logger;
 
   // The GitHub API uses team IDs, but names are more convenient for configuration, and we can't
   // look them up until we have a user's token. Cache them globally here.
@@ -31,6 +32,10 @@ exports.makeStrategyCallback = function (context) {
       addresses.push(each.value.toLowerCase());
     });
 
+    logger.debug('Discovered ' + addresses.length + ' email addresses from profile.', {
+      addresses: addresses
+    });
+
     return addresses;
   };
 
@@ -44,6 +49,8 @@ exports.makeStrategyCallback = function (context) {
       if (results.length > 1) return callback(new Error('More than one user found.'));
 
       if (results.length === 0) {
+        logger.info('Creating new user named ' + addresses[0].toLowerCase());
+
         var user = new User();
         user.email = addresses[0].toLowerCase();
         user.created = new Date();
@@ -53,6 +60,7 @@ exports.makeStrategyCallback = function (context) {
         return user.save(callback);
       }
 
+      logger.info('Existing user with address ' + results[0].email + ' authenticated.');
       callback(null, results[0]);
     });
   };
@@ -60,8 +68,12 @@ exports.makeStrategyCallback = function (context) {
   // Derive a user's current level of authorization against membership in a GitHub organization.
   // Organization owners correspond to Strider admins.
   var checkOrgMembership = function (gh, callback) {
+    logger.debug('Checking authorization by membership in organization ' + config.orgName);
+
     gh.belongsToOrganization(config.orgName, function (err, isMember, isAdmin) {
       if (err) return callback(err);
+      logger.debug('Is member: ' + isMember + ' Is admin: ' + isAdmin);
+
       if (isMember && isAdmin) return callback(null, ADMIN);
       if (isMember && !isAdmin) return callback(null, ACCESS);
       callback(null, UNAUTHORIZED);
@@ -84,6 +96,7 @@ exports.makeStrategyCallback = function (context) {
 
     gh.findTeamWithName(config.orgName, teamName, function (err, id) {
       if (err) return callback(err);
+      logger.debug('Team ' + teamType + ' named ' + teamName + ' has id ' + id);
 
       teamIds[teamType] = id;
       callback();
@@ -101,6 +114,8 @@ exports.makeStrategyCallback = function (context) {
   // Derive a user's current level of authorization against membership in one of two teams withing
   // a GitHub organization.
   var checkTeamMembership = function (gh, callback) {
+    logger.debug('Checking authorization by membership in teams');
+
     ensureTeamIds(gh, function (err) {
       if (err) return callback(err);
 
@@ -109,6 +124,7 @@ exports.makeStrategyCallback = function (context) {
         admin: function (cb) { gh.belongsToTeam(teamIds.admin, cb); }
       }, function (err, results) {
         if (err) return callback(err);
+        logger.debug('Is member: ' + results.access + ' Is admin: ' + results.admin);
 
         if (results.admin) return callback(null, ADMIN);
         if (results.access) return callback(null, ACCESS);

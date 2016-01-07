@@ -46,7 +46,7 @@ GitHub.prototype.belongsToTeam = function (teamId, callback) {
     }
 
     if (response.statusCode !== 200) {
-      return callback(new Error('Unexpected status from GitHub API', {
+      return callback(new Error('Unexpected ' + response.statusCode + ' status from GitHub API', {
         path: p,
         statusCode: response.statusCode,
         body: body
@@ -63,8 +63,18 @@ GitHub.prototype.findTeamWithName = function (orgName, teamName, callback) {
   p += '/teams';
 
   var consumePage = function (u) {
-    this.api.get(u, function (err, response, body) {
+    var opts = { url: u };
+    if (/^http/.test(u)) {
+      opts.baseUrl = null;
+    }
+
+    this.api.get(opts, function (err, response, body) {
       if (err) return callback(err);
+
+      if (response.statusCode === 403) {
+        // User does not belong to this organization.
+        return callback(null, null);
+      }
 
       if (response.statusCode !== 200) {
         return callback(new Error('Unexpected ' + response.statusCode + ' status from GitHub API', {
@@ -89,7 +99,7 @@ GitHub.prototype.findTeamWithName = function (orgName, teamName, callback) {
         }));
       }
 
-      consumePage(link.next);
+      consumePage(parsed.next.url);
     });
   }.bind(this);
 

@@ -95,9 +95,14 @@ exports.makeStrategyCallback = function (context) {
 
     gh.findTeamWithName(config.orgName, teamName, function (err, id) {
       if (err) return callback(err);
-      logger.debug('Team ' + teamType + ' named ' + teamName + ' has id ' + id);
 
-      teamIds[teamType] = id;
+      if (id === null) {
+        logger.debug('Unable to fetch team id for team named ' + teamName);
+      } else {
+        logger.debug('Team ' + teamType + ' named ' + teamName + ' has id ' + id);
+        teamIds[teamType] = id;
+      }
+
       callback();
     });
   };
@@ -117,6 +122,11 @@ exports.makeStrategyCallback = function (context) {
 
     ensureTeamIds(gh, function (err) {
       if (err) return callback(err);
+
+      // User doesn't belong to the org at all, and it's the first request.
+      if (teamIds.access === null || teamIds.admin === null) {
+        return callback(null, UNAUTHORIZED);
+      }
 
       async.parallel({
         access: function (cb) { gh.belongsToTeam(teamIds.access, cb); },
@@ -160,7 +170,7 @@ exports.makeStrategyCallback = function (context) {
         title: gh.profile.username,
         config: {
           accessToken: gh.accessToken,
-          login: gh.username,
+          login: gh.profile.username,
           email: user.email,
           gravatarId: gh.profile._json.gravatar_id,
           name: gh.profile.displayName
@@ -169,7 +179,9 @@ exports.makeStrategyCallback = function (context) {
       });
     }
 
-    user.save(callback);
+    user.save(function (err) {
+      callback(err, user);
+    });
   };
 
   // All together, now.

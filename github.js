@@ -63,7 +63,12 @@ GitHub.prototype.findTeamWithName = function (orgName, teamName, callback) {
   p += '/teams';
 
   var consumePage = function (u) {
-    this.api.get(u, function (err, response, body) {
+    var opts = { url: u };
+    if (/^http/.test(u)) {
+      opts.baseUrl = null;
+    }
+
+    this.api.get(opts, function (err, response, body) {
       if (err) return callback(err);
 
       if (response.statusCode === 403) {
@@ -94,7 +99,7 @@ GitHub.prototype.findTeamWithName = function (orgName, teamName, callback) {
         }));
       }
 
-      consumePage(link.next);
+      consumePage(parsed.next.url);
     });
   }.bind(this);
 

@@ -169,7 +169,9 @@ exports.makeStrategyCallback = function (context) {
       });
     }
 
-    user.save(callback);
+    user.save(function (err) {
+      callback(err, user);
+    });
   };
 
   // All together, now.

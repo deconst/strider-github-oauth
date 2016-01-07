@@ -33,9 +33,10 @@
     "icon": "icon.png"
   },
   "devDependencies": {
-    "chai": "^1.9.1",
-    "hock": "^1.2.0",
+    "chai": "^3.4.1",
+    "deep-equal": "^1.0.1",
+    "dirty-chai": "^1.2.2",
     "mocha": "^1.20.1",
-    "sinon-chai": "^2.5.0"
+    "nock": "^4.0.0"
   }
 }

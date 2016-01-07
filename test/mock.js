@@ -5,11 +5,17 @@ function MockUser () {
   this.email = null;
   this.created = null;
   this.password = null;
+  this.account_level = 0;
   this.projects = [];
+  this.accounts = [];
 }
 
 MockUser.prototype.set = function (arg, value) {
   this[arg] = value;
+};
+
+MockUser.prototype.account = function (name, id) {
+  return null;
 };
 
 MockUser.prototype.save = function (callback) {

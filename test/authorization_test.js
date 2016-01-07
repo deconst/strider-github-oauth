@@ -11,7 +11,12 @@ var mock = require('./mock');
 describe("user authorization", function() {
 
 	var profile = {
-		emails: [{ value: 'me@gmail.com' }]
+		id: 12,
+		displayName: 'me',
+		username: 'me',
+		emails: [{ value: 'me@gmail.com' }],
+		profileUrl: 'https://localhost/1',
+		_json: { gravatar_id: 'whatever' }
 	};
 
 	var context = {
@@ -48,9 +53,38 @@ describe("user authorization", function() {
 			});
 		});
 
-		it("grants access to users in the org");
+		it("grants access to users in the org", function (done) {
+			nock('https://api.github.com/')
+				.get('/user/memberships/orgs/the-org')
+				.reply(200, {
+					state: 'active'
+				});
 
-		it("grants admin access to owners in the org");
+			strategyCallback('12345', null, profile, function (err, user) {
+				expect(err).to.be.null();
+				expect(user.email).to.equal('me@gmail.com');
+				expect(user.account_level).to.equal(0);
+
+				done();
+			});
+		});
+
+		it("grants admin access to owners in the org", function (done) {
+			nock('https://api.github.com/')
+				.get('/user/memberships/orgs/the-org')
+				.reply(200, {
+					state: 'active',
+					role: 'admin'
+				});
+
+			strategyCallback('12345', null, profile, function (err, user) {
+				expect(err).to.be.null();
+				expect(user.email).to.equal('me@gmail.com');
+				expect(user.account_level).to.equal(1);
+
+				done();
+			});
+		});
 
 	});
 

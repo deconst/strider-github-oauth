@@ -95,9 +95,14 @@ exports.makeStrategyCallback = function (context) {
 
     gh.findTeamWithName(config.orgName, teamName, function (err, id) {
       if (err) return callback(err);
-      logger.debug('Team ' + teamType + ' named ' + teamName + ' has id ' + id);
 
-      teamIds[teamType] = id;
+      if (id === null) {
+        logger.debug('Unable to fetch team id for team named ' + teamName);
+      } else {
+        logger.debug('Team ' + teamType + ' named ' + teamName + ' has id ' + id);
+        teamIds[teamType] = id;
+      }
+
       callback();
     });
   };

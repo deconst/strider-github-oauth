@@ -66,6 +66,11 @@ GitHub.prototype.findTeamWithName = function (orgName, teamName, callback) {
     this.api.get(u, function (err, response, body) {
       if (err) return callback(err);
 
+      if (response.statusCode === 403) {
+        // User does not belong to this organization.
+        return callback(null, null);
+      }
+
       if (response.statusCode !== 200) {
         return callback(new Error('Unexpected ' + response.statusCode + ' status from GitHub API', {
           path: p,

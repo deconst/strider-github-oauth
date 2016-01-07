@@ -46,7 +46,7 @@ GitHub.prototype.belongsToTeam = function (teamId, callback) {
     }
 
     if (response.statusCode !== 200) {
-      return callback(new Error('Unexpected status from GitHub API', {
+      return callback(new Error('Unexpected ' + response.statusCode + ' status from GitHub API', {
         path: p,
         statusCode: response.statusCode,
         body: body

@@ -1,5 +1,7 @@
 # GitHub OAuth login
 
+[![Build Status](https://travis-ci.org/smashwilson/strider-github-oauth.svg?branch=master)](https://travis-ci.org/smashwilson/strider-github-oauth)
+
 This plugin extends Strider with the ability to authenticate to Strider itself via GitHub OAuth. It uses GitHub organization membership, or teams within an organization, as a source of truth for authorization. Strider users are automatically created for GitHub users on first login.
 
 ## Configuration

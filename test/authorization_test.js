@@ -12,11 +12,14 @@ describe("user authorization", function() {
 
 	var profile = {
 		id: 12,
-		displayName: 'me',
-		username: 'me',
+		displayName: 'displayName',
+		username: 'username',
 		emails: [{ value: 'me@gmail.com' }],
-		profileUrl: 'https://localhost/1',
-		_json: { gravatar_id: 'whatever' }
+		profileUrl: 'https://localhost/users/12',
+		_json: {
+			login: 'json_login',
+			gravatar_id: 'whatever'
+		}
 	};
 
 	var context = {

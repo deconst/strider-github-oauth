@@ -29,6 +29,33 @@ describe("user authorization", function() {
 
 	var strategyCallback = null;
 
+	var shouldDeny = function (done) {
+		strategyCallback('12345', null, profile, function (err, user) {
+			expect(err.message).to.equal('User not authorized');
+			expect(user).to.be.undefined();
+
+			done();
+		});
+	};
+
+	var shouldGrantAccess = function (done) {
+		strategyCallback('12345', null, profile, function (err, user) {
+			expect(err).to.be.null();
+			expect(user.account_level).to.equal(0);
+
+			done();
+		});
+	};
+
+	var shouldGrantAdmin = function (done) {
+		strategyCallback('12345', null, profile, function (err, user) {
+			expect(err).to.be.null();
+			expect(user.account_level).to.equal(1);
+
+			done();
+		});
+	};
+
 	beforeEach(function () {
 		config.apiEndpoint = 'https://api.github.com/';
 
@@ -48,12 +75,7 @@ describe("user authorization", function() {
 				.get('/user/memberships/orgs/the-org')
 				.reply(404);
 
-			strategyCallback('12345', null, profile, function (err, user) {
-				expect(err.message).to.equal('User not authorized');
-				expect(user).to.be.undefined();
-
-				done();
-			});
+			shouldDeny(done);
 		});
 
 		it("grants access to users in the org", function (done) {
@@ -63,13 +85,7 @@ describe("user authorization", function() {
 					state: 'active'
 				});
 
-			strategyCallback('12345', null, profile, function (err, user) {
-				expect(err).to.be.null();
-				expect(user.email).to.equal('me@gmail.com');
-				expect(user.account_level).to.equal(0);
-
-				done();
-			});
+			shouldGrantAccess(done);
 		});
 
 		it("grants admin access to owners in the org", function (done) {
@@ -80,26 +96,67 @@ describe("user authorization", function() {
 					role: 'admin'
 				});
 
-			strategyCallback('12345', null, profile, function (err, user) {
-				expect(err).to.be.null();
-				expect(user.email).to.equal('me@gmail.com');
-				expect(user.account_level).to.equal(1);
-
-				done();
-			});
+			shouldGrantAdmin(done);
 		});
 
 	});
 
 	describe("based on team membership", function () {
 
-		it("denies access to users not in the org");
+		var notOnOrg = function () {
+			return nock('https://api.github.com/')
+				.get('/orgs/the-org/teams')
+				.twice()
+				.reply(403);
+		};
 
-		it("denies access to users in the org but not in either team");
+		var onOrg = function () {
+			return nock('https://api.github.com/')
+				.get('/orgs/the-org/teams')
+				.twice()
+				.reply(200, [
+					{ id: 111, name: 'access-team' },
+					{ id: 222, name: 'admin-team' }
+				]);
+		};
 
-		it("grants access to users in the access team");
+		beforeEach(function () {
+			config.orgName = "the-org";
+			config.accessTeamName = "access-team";
+			config.adminTeamName = "admin-team";
+		});
 
-		it("grants admin to users in the admin team");
+		it("denies access to users not in the org", function (done) {
+			notOnOrg();
+			shouldDeny(done);
+		});
+
+		it("denies access to users in the org but not in either team", function (done) {
+			onOrg()
+				.get('/teams/111/memberships/json_login')
+				.reply(404)
+				.get('/teams/222/memberships/json_login')
+				.reply(404);
+			shouldDeny(done);
+		});
+
+		it("grants access to users in the access team", function (done) {
+			onOrg()
+				.get('/teams/111/memberships/json_login')
+				.reply(200, { state: 'active' })
+				.get('/teams/222/memberships/json_login')
+				.reply(404);
+			shouldGrantAccess(done);
+		});
+
+		it("grants admin to users in the admin team", function (done) {
+			onOrg()
+				.get('/teams/111/memberships/json_login')
+				.reply(404)
+				.get('/teams/222/memberships/json_login')
+				.reply(200, { state: 'active' });
+			shouldGrantAdmin(done);
+		});
 
 	});
 

@@ -160,7 +160,7 @@ exports.makeStrategyCallback = function (context) {
         title: gh.profile.username,
         config: {
           accessToken: gh.accessToken,
-          login: gh.username,
+          login: gh.profile.username,
           email: user.email,
           gravatarId: gh.profile._json.gravatar_id,
           name: gh.profile.displayName

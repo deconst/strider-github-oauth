@@ -123,6 +123,11 @@ exports.makeStrategyCallback = function (context) {
     ensureTeamIds(gh, function (err) {
       if (err) return callback(err);
 
+      // User doesn't belong to the org at all, and it's the first request.
+      if (teamIds.access === null || teamIds.admin === null) {
+        return callback(null, UNAUTHORIZED);
+      }
+
       async.parallel({
         access: function (cb) { gh.belongsToTeam(teamIds.access, cb); },
         admin: function (cb) { gh.belongsToTeam(teamIds.admin, cb); }

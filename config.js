@@ -1,4 +1,6 @@
-exports.serverName = process.env.SERVER_NAME || 'http://localhost:3000';
+// Strider (destructively) converts the environment variable SERVER_NAME to strider_server_name.
+// What the hell, Strider
+exports.serverName = process.env.strider_server_name || 'http://localhost:3000';
 
 exports.clientId = process.env.PLUGIN_GITHUB_APP_ID;
 exports.clientSecret = process.env.PLUGIN_GITHUB_APP_SECRET;

@@ -1,6 +1,6 @@
 {
-  "name": "strider-github-auth",
-  "version": "1.0.1",
+  "name": "strider-github-oauth",
+  "version": "1.0.2",
   "description": "GitHub OAuth login flow for Strider CD",
   "main": "webapp.js",
   "scripts": {

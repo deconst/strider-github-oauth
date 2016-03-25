@@ -32,6 +32,10 @@ exports.makeStrategyCallback = function (context) {
         return result.verified;
       });
 
+      if (verified.length === 0) {
+        return callback(new Error('You have no verified email addresses on GitHub.'))
+      }
+
       var addresses = verified.map(function (result) {
         var downcased = result.email.toLowerCase();
 

@@ -45,8 +45,8 @@ describe("user authorization", function() {
 
   var shouldGrantAccess = function (p, done) {
     if (!done) {
-      done = p
-      p = profile
+      done = p;
+      p = profile;
     }
 
     strategyCallback('12345', null, p, function (err, user) {
@@ -57,14 +57,32 @@ describe("user authorization", function() {
     });
   };
 
-  var shouldGrantAdmin = function (done) {
-    strategyCallback('12345', null, profile, function (err, user) {
+  var shouldGrantAdmin = function (p, done) {
+    if (!done) {
+      done = p;
+      p = profile;
+    };
+
+    strategyCallback('12345', null, p, function (err, user) {
       expect(err).to.be.null();
       expect(user.account_level).to.equal(1);
 
-      done();
+      done(null, user);
     });
   };
+
+  var shouldErr = function (p, done) {
+    if (!done) {
+      done = p;
+      profile = p;
+    };
+
+    strategyCallback('12345', null, p, function (err, user) {
+      expect(err).not.to.be.null();
+
+      done(null, err);
+    });
+  }
 
   var withEmails = function (emails) {
     if (!emails) {
@@ -254,8 +272,10 @@ describe("user authorization", function() {
         { email: 'nope@gmail.com', verified: false, primary: true }
       ]));
 
-      shouldGrantAccess(emailless, function (err) {
-        expect(err.message).to.equal('You have no verified email addresses in your profile.');
+      shouldErr(emailless, function (err, e) {
+        if (err) return done(err);
+
+        expect(e.message).to.equal('You have no verified email addresses on GitHub.');
 
         done();
       });

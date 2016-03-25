@@ -194,10 +194,18 @@ describe("user authorization", function() {
       }
     };
 
+    var onOrgAnd = function (n) {
+      config.orgName = "the-org";
+      config.accessTeamName = null;
+      config.adminTeamName = null;
+
+      return n.get('/user/memberships/orgs/the-org').reply(200, { state: 'active' });
+    };
+
     it('checks for emails from the GitHub API', function (done) {
-      withEmails([
+      onOrgAnd(withEmails([
         { email: 'additional@gmail.com', verified: true, primary: true }
-      ]);
+      ]));
 
       shouldGrantAccess(emailless, function (err, user) {
         if (err) return done(err);

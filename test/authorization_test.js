@@ -216,7 +216,21 @@ describe("user authorization", function() {
       });
     });
 
-    it('uses your primary email address to create a user account');
+    it('uses your primary email address to create a user account', function (done) {
+      onOrgAnd(withEmails([
+        { email: 'first@gmail.com', verified: true, primary: false },
+        { email: 'primary@gmail.com', verified: true, primary: true },
+        { email: 'extra@gmail.com', verified: true, primary: false }
+      ]));
+
+      shouldGrantAccess(emailless, function (err, user) {
+        if (err) return done(err);
+
+        expect(user.email).to.equal('primary@gmail.com');
+
+        done()
+      })
+    });
 
     it('uses the first verified email address if the primary address is not verified');
   });

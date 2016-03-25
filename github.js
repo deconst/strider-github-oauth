@@ -18,6 +18,22 @@ function GitHub(profile, accessToken) {
   });
 }
 
+GitHub.prototype.emails = function (callback) {
+  this.api.get('/user/emails', function (err, response, body) {
+    if (err) return callback(err);
+
+    if (response.statusCode !== 200) {
+      return callback(new Error('Unexpected ' + response.statusCode + ' status from GitHub API', {
+        path: '/user/emails',
+        statusCode: response.statusCode,
+        body: body
+      }));
+    }
+
+    return callback(null, body);
+  })
+};
+
 GitHub.prototype.belongsToOrganization = function (orgName, callback) {
   var p = '/user/memberships/orgs/' +  encodeURIComponent(orgName);
 

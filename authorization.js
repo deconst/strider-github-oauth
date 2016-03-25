@@ -22,45 +22,74 @@ exports.makeStrategyCallback = function (context) {
   var ADMIN = 1;
 
   // Given a profile from the GitHub API, return an array of normalized email addresses to test.
-  var emailsFromProfile = function (profile) {
-    var addresses = [];
+  var emailsFromGitHub = function (gh, callback) {
+    gh.emails(function (err, emails) {
+      if (err) return callback(err);
 
-    profile.emails.forEach(function(each) {
-      addresses.push(each.value.toLowerCase());
+      var primary = null;
+
+      var verified = emails.filter(function (result) {
+        return result.verified;
+      });
+
+      if (verified.length === 0) {
+        return callback(new Error('You have no verified email addresses on GitHub.'))
+      }
+
+      var addresses = verified.map(function (result) {
+        var downcased = result.email.toLowerCase();
+
+        if (result.primary && !primary) {
+          primary = downcased;
+        }
+
+        return downcased;
+      });
+
+      if (!primary) {
+        primary = addresses[0];
+      }
+
+      logger.debug('Discovered ' + addresses.length + ' email addresses from the GitHub API.', {
+        addresses: addresses,
+        primary: primary
+      });
+
+      callback(null, addresses, primary);
     });
-
-    logger.debug('Discovered ' + addresses.length + ' email addresses from profile.', {
-      addresses: addresses
-    });
-
-    return addresses;
   };
 
   // Locate the single Strider User model that uses one of the potential email addresses from
   // GitHub. Create one if none are found.
-  var findUser = function (profile, callback) {
-    var addresses = emailsFromProfile(profile);
-
-    User.find({ email: { $in: addresses }}, function (err, results) {
+  var findUser = function (gh, profile, callback) {
+    emailsFromGitHub(gh, function (err, addresses, primary) {
       if (err) return callback(err);
-      if (results.length > 1) return callback(new Error('More than one user found.'));
 
-      if (results.length === 0) {
-        logger.info('Creating new user named ' + addresses[0].toLowerCase());
+      User.find({ email: { $in: addresses }}, function (err, results) {
+        if (err) return callback(err);
 
-        var user = new User();
-        user.email = addresses[0].toLowerCase();
-        user.created = new Date();
-        user.set('password', crypto.randomBytes(256).toString('utf-8'));
-        user.projects = [];
+        if (results.length > 1) {
+          var emails = results.map(function (r) { return r.email });
+          return callback(new Error('More than one user found matching addresses: ' + emails));
+        }
 
-        return user.save(function (err) {
-          callback(err, user);
-        });
-      }
+        if (results.length === 0) {
+          logger.info('Creating new user named ' + primary);
 
-      logger.info('Existing user with address ' + results[0].email + ' authenticated.');
-      callback(null, results[0]);
+          var user = new User();
+          user.email = primary;
+          user.created = new Date();
+          user.set('password', crypto.randomBytes(256).toString('utf-8'));
+          user.projects = [];
+
+          return user.save(function (err) {
+            callback(err, user);
+          });
+        }
+
+        logger.info('Existing user with address ' + results[0].email + ' authenticated.');
+        callback(null, results[0]);
+      });
     });
   };
 
@@ -189,7 +218,7 @@ exports.makeStrategyCallback = function (context) {
     var gh = new GitHub(profile, accessToken);
 
     async.parallel({
-      user: async.apply(findUser, profile),
+      user: async.apply(findUser, gh, profile),
       authorization: async.apply(checkAuthorization, gh)
     }, function (err, results) {
       if (err) return callback(err);

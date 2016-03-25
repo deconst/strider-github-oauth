@@ -28,7 +28,11 @@ exports.makeStrategyCallback = function (context) {
 
       var primary = null;
 
-      var addresses = emails.map(function (result) {
+      var verified = emails.filter(function (result) {
+        return result.verified;
+      });
+
+      var addresses = verified.map(function (result) {
         var downcased = result.email.toLowerCase();
 
         if (result.primary && !primary) {

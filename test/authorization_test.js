@@ -194,7 +194,7 @@ describe("user authorization", function() {
       }
     };
 
-    it('checks for additional emails from the GitHub API', function (done) {
+    it('checks for emails from the GitHub API', function (done) {
       withEmails([
         { email: 'additional@gmail.com', verified: true, primary: true }
       ]);

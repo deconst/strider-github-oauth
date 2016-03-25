@@ -29,21 +29,31 @@ describe("user authorization", function() {
 
   var strategyCallback = null;
 
-  var shouldDeny = function (done) {
-    strategyCallback('12345', null, profile, function (err, user) {
+  var shouldDeny = function (p, done) {
+    if (!done) {
+      done = p
+      p = profile
+    }
+
+    strategyCallback('12345', null, p, function (err, user) {
       expect(err.message).to.equal('User not authorized');
       expect(user).to.be.undefined();
 
-      done();
+      done(null, user);
     });
   };
 
-  var shouldGrantAccess = function (done) {
-    strategyCallback('12345', null, profile, function (err, user) {
+  var shouldGrantAccess = function (p, done) {
+    if (!done) {
+      done = p
+      p = profile
+    }
+
+    strategyCallback('12345', null, p, function (err, user) {
       expect(err).to.be.null();
       expect(user.account_level).to.equal(0);
 
-      done();
+      done(null, user);
     });
   };
 
@@ -55,6 +65,18 @@ describe("user authorization", function() {
       done();
     });
   };
+
+  var withEmails = function (emails) {
+    if (!emails) {
+      emails = [
+        { email: 'me@gmail.com', verified: true, primary: true }
+      ]
+    }
+
+    return nock('https://api.github.com/')
+      .get('/user/emails')
+      .reply(200, emails);
+  }
 
   beforeEach(function () {
     config.apiEndpoint = 'https://api.github.com/';
@@ -71,7 +93,7 @@ describe("user authorization", function() {
     });
 
     it("denies access to users not in the org", function (done) {
-      nock('https://api.github.com/')
+      withEmails()
         .get('/user/memberships/orgs/the-org')
         .reply(404);
 
@@ -79,7 +101,7 @@ describe("user authorization", function() {
     });
 
     it("grants access to users in the org", function (done) {
-      nock('https://api.github.com/')
+      withEmails()
         .get('/user/memberships/orgs/the-org')
         .reply(200, {
           state: 'active'
@@ -89,7 +111,7 @@ describe("user authorization", function() {
     });
 
     it("grants admin access to owners in the org", function (done) {
-      nock('https://api.github.com/')
+      withEmails()
         .get('/user/memberships/orgs/the-org')
         .reply(200, {
           state: 'active',
@@ -104,14 +126,14 @@ describe("user authorization", function() {
   describe("based on team membership", function () {
 
     var notOnOrg = function () {
-      return nock('https://api.github.com/')
+      return withEmails()
         .get('/orgs/the-org/teams')
         .twice()
         .reply(403);
     };
 
     var onOrg = function () {
-      return nock('https://api.github.com/')
+      return withEmails()
         .get('/orgs/the-org/teams')
         .twice()
         .reply(200, [
@@ -165,7 +187,6 @@ describe("user authorization", function() {
       id: 13,
       displayName: 'No Email',
       username: 'emailless',
-      emails: [{ value: undefined }],
       profileUrl: 'https://localhost/users/13',
       _json: {
         login: 'json_login',
@@ -173,17 +194,23 @@ describe("user authorization", function() {
       }
     };
 
-    var withEmails = function (emails) {
-      return nock('https://api.github.com/')
-        .get('/user/emails')
-        .reply(200, emails);
-    }
+    it('checks for additional emails from the GitHub API', function (done) {
+      withEmails([
+        { email: 'additional@gmail.com', verified: true, primary: true }
+      ]);
 
-    it('checks for additional emails from the GitHub API');
+      shouldGrantAccess(emailless, function (err, user) {
+        if (err) return done(err);
 
-    it('uses only verified email addresses');
+        expect(user.email).to.equal('additional@gmail.com');
+
+        done();
+      });
+    });
 
     it('uses your primary email address to create a user account');
+
+    it('uses the first verified email address if the primary address is not verified');
   });
 
 });

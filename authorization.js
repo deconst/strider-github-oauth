@@ -61,8 +61,8 @@ exports.makeStrategyCallback = function (context) {
         if (err) return callback(err);
 
         if (results.length > 1) {
-          var emails = results.map(function (r) { return r.email })
-          return callback(new Error('More than one user found matching addresses: ' + results));
+          var emails = results.map(function (r) { return r.email });
+          return callback(new Error('More than one user found matching addresses: ' + emails));
         }
 
         if (results.length === 0) {

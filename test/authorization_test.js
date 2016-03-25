@@ -160,4 +160,30 @@ describe("user authorization", function() {
 
 	});
 
+	describe('without a public email address', function () {
+		var emailless = {
+			id: 13,
+			displayName: 'No Email',
+			username: 'emailless',
+			emails: [{ value: undefined }],
+			profileUrl: 'https://localhost/users/13',
+			_json: {
+				login: 'json_login',
+				gravatar_id: 'whatever'
+			}
+		};
+
+		var withEmails = function (emails) {
+			return nock('https://api.github.com/')
+				.get('/user/emails')
+				.reply(200, emails);
+		}
+
+		it('checks for additional emails from the GitHub API');
+
+		it('uses only verified email addresses');
+
+		it('uses your primary email address to create a user account');
+	});
+
 });

@@ -232,7 +232,22 @@ describe("user authorization", function() {
       })
     });
 
-    it('uses the first verified email address if the primary address is not verified');
+    it('uses the first verified email address if the primary address is not verified', function (done) {
+      onOrgAnd(withEmails([
+        { email: 'unverified.primary@gmail.com', verified: false, primary: true },
+        { email: 'unverified@gmail.com', verified: false, primary: false },
+        { email: 'correct@gmail.com', verified: true, primary: false },
+        { email: 'extra@gmail.com', verified: true, primary: false }
+      ]));
+
+      shouldGrantAccess(emailless, function (err, user) {
+        if (err) return done(err);
+
+        expect(user.email).to.equal('correct@gmail.com');
+
+        done();
+      });
+    });
   });
 
 });

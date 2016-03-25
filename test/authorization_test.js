@@ -248,6 +248,18 @@ describe("user authorization", function() {
         done();
       });
     });
+
+    it('fails when you have no verified email addresses', function (done) {
+      onOrgAnd(withEmails([
+        { email: 'nope@gmail.com', verified: false, primary: true }
+      ]));
+
+      shouldGrantAccess(emailless, function (err) {
+        expect(err.message).to.equal('You have no verified email addresses in your profile.');
+
+        done();
+      });
+    });
   });
 
 });

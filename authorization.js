@@ -26,22 +26,35 @@ exports.makeStrategyCallback = function (context) {
     gh.emails(function (err, emails) {
       if (err) return callback(err);
 
+      var primary = null;
+
       var addresses = emails.map(function (result) {
-        return result.email.toLowerCase();
+        var downcased = result.email.toLowerCase();
+
+        if (result.primary && !primary) {
+          primary = downcased;
+        }
+
+        return downcased;
       });
+
+      if (!primary) {
+        primary = addresses[0];
+      }
 
       logger.debug('Discovered ' + addresses.length + ' email addresses from the GitHub API.', {
-        addresses: addresses
+        addresses: addresses,
+        primary: primary
       });
 
-      callback(null, addresses);
+      callback(null, addresses, primary);
     });
   };
 
   // Locate the single Strider User model that uses one of the potential email addresses from
   // GitHub. Create one if none are found.
   var findUser = function (gh, profile, callback) {
-    emailsFromGitHub(gh, function (err, addresses) {
+    emailsFromGitHub(gh, function (err, addresses, primary) {
       if (err) return callback(err);
 
       User.find({ email: { $in: addresses }}, function (err, results) {
@@ -53,10 +66,10 @@ exports.makeStrategyCallback = function (context) {
         }
 
         if (results.length === 0) {
-          logger.info('Creating new user named ' + addresses[0].toLowerCase());
+          logger.info('Creating new user named ' + primary);
 
           var user = new User();
-          user.email = addresses[0].toLowerCase();
+          user.email = primary;
           user.created = new Date();
           user.set('password', crypto.randomBytes(256).toString('utf-8'));
           user.projects = [];

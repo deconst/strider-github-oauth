@@ -27,6 +27,12 @@ module.exports = function(context, done) {
       res.redirect('/');
     });
 
+  context.registerBlock('ExtraLoginButton', function (context, cb) {
+    cb(null, `<a class="btn btn-primary provider-github" href="/github/auth/login/">
+      <i class="fa fa-github"></i> Log in with GitHub
+    </a>`);
+  })
+
   context.registerBlock('LoggedOutFillContent', function (context, cb) {
     var templatePath = path.join(__dirname, './static/login.html');
     fs.readFile(templatePath, { encoding: 'utf-8' }, cb);
